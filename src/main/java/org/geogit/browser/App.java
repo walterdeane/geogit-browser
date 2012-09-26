@@ -142,16 +142,16 @@ public class App extends JPanel implements TreeSelectionListener {
 				}
 		}
 System.out.println(helpText);
-		// JFileChooser chooser = new JFileChooser();
-		// chooser.setDialogTitle("Select geogit repository folder");
-		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		// int returnVal = chooser.showOpenDialog(App.this);
-		// if(returnVal == JFileChooser.APPROVE_OPTION) {
-		// base = chooser.getSelectedFile();
-		// } else {
-		// System.out.println("Open command cancelled by user." );
-		// return;
-		// }
+		 JFileChooser chooser = new JFileChooser();
+		 chooser.setDialogTitle("Select geogit repository folder");
+		 chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		 int returnVal = chooser.showOpenDialog(App.this);
+		 if(returnVal == JFileChooser.APPROVE_OPTION) {
+		 base = chooser.getSelectedFile();
+		 } else {
+		 System.out.println("Open command cancelled by user." );
+		 return;
+		 }
 		util = new GeoGitUtil();
 
 		try {
