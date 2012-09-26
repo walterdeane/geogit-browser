@@ -1,6 +1,9 @@
 package org.geogit.browser;
 
 import org.geogit.api.Ref;
+import org.geogit.api.RevCommit;
+import org.geogit.api.config.BranchConfigObject;
+import org.geogit.api.config.RemoteConfigObject;
 import org.geotools.filter.identity.FeatureIdVersionedImpl;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
@@ -8,7 +11,7 @@ import org.opengis.feature.type.Name;
 public class RepoInfo {
 
 	public static enum EntryType{
-		FEATURE,FEATURE_ID, FEATURE_TYPE_NAME, FEATURE_TYPE, REF_COMMIT,REF_TREE,REF_TAG,REF_REMOTE, REF_NAMESPACE, REF_FEATURE_TYPE, REF_FEATURE;
+		FEATURE,FEATURE_ID, FEATURE_TYPE_NAME, FEATURE_TYPE, REV_COMMIT,CONFIG_BRANCH,CONFIG_REMOTE,REF_TREE,REF_TAG,REF_REMOTE, REF_NAMESPACE, REF_FEATURE_TYPE, REF_FEATURE;
 	}
 	private EntryType type;
 	
@@ -47,11 +50,18 @@ public class RepoInfo {
 			 typeName = ((SimpleFeatureType) entry).getName();
 			value =  typeName.getNamespaceURI() + ":"+ typeName.getLocalPart();
 			break;
-	case REF_COMMIT:
-		value =  ( (Ref) entry).toString();
+	case REV_COMMIT:
+		RevCommit commit = (RevCommit) entry;
+		value =  "Commit."+ commit.getId();
 		break;
 	case FEATURE_ID:
 		value = ((FeatureIdVersionedImpl)entry).getID();
+		break;
+	case CONFIG_REMOTE:
+		value = ((RemoteConfigObject)entry).getName();
+		break;
+	case CONFIG_BRANCH:
+		value = ((BranchConfigObject)entry).getName();
 		break;
 	case REF_NAMESPACE:
 		default: 
