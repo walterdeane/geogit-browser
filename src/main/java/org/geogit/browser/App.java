@@ -10,7 +10,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,8 @@ import org.opengis.filter.Id;
 import org.opengis.filter.identity.FeatureId;
 import org.geogit.browser.RepoInfo.EntryType;
 import org.geogit.browser.RepoInfo.EntryType.*;
+
+import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Hello world!
@@ -488,9 +492,12 @@ System.out.println(helpText);
 	}
 	private String displayRevCommit(RevCommit revCommit) {
 		String output = "";
+		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+		 
+		Date resultdate = new Date( revCommit.getTimestamp());
 		output += "<h1>Commit." + revCommit.getId() + "</h1>\n";
 		output += "<ul><li><b>Id:</b> " + revCommit.getId() + "</li>\n";
-		output += "<ul><li><b>Timestamp:</b> " + revCommit.getTimestamp()
+		output += "<li><b>Timestamp:</b> " + formatTimeStamp(revCommit.getTimestamp())
 				+ "</li>\n";
 		output += "<li><b>Author:</b> " + revCommit.getAuthor() + "</li>\n";
 		output += "<li><b>Message:</b> " + revCommit.getMessage()
@@ -502,6 +509,13 @@ System.out.println(helpText);
 		output += "</table>\n";
 		return output;
 	}
+	
+	private String formatTimeStamp(long timestamp)  {
+		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+		 
+		Date resultdate = new Date( timestamp);
+		return sdf.format(resultdate);
+	}
 
 	private String displayParentRevCommit(RevCommit revCommit) {
 		String output = "";
@@ -509,10 +523,9 @@ System.out.println(helpText);
 			try {
 				RevCommit commit = store.getRepository().getCommit(commitId);
 				output += "<tr><td>Commit." + revCommit.getId() + "</td><td>"
-						+ commit.getTimestamp() + "</td><td>"
+						+ formatTimeStamp(commit.getTimestamp()) + "</td><td>"
 						+ commit.getAuthor() + "</td><td>"
 						+ commit.getMessage() + "</td></tr>\n";
-				output += displayParentRevCommit(commit);
 			} catch (Exception ex) {
 			}
 		}
