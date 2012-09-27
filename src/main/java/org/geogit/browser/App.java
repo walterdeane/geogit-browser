@@ -2,7 +2,6 @@ package org.geogit.browser;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,11 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,20 +26,15 @@ import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 import org.geogit.api.ObjectId;
 import org.geogit.api.Ref;
-import org.geogit.api.RevBlob;
 import org.geogit.api.RevCommit;
-import org.geogit.api.RevObject;
-import org.geogit.api.RevTree;
-import org.geogit.api.TreeVisitor;
 import org.geogit.api.config.BranchConfigObject;
 import org.geogit.api.config.Config;
 import org.geogit.api.config.RemoteConfigObject;
+import org.geogit.browser.RepoInfo.EntryType;
 import org.geogit.repository.Repository;
 import org.geotools.data.geogit.GeoGitDataStore;
 import org.geotools.data.geogit.GeoGitFeatureSource;
@@ -58,26 +50,23 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.Id;
 import org.opengis.filter.identity.FeatureId;
-import org.geogit.browser.RepoInfo.EntryType;
-import org.geogit.browser.RepoInfo.EntryType.*;
-
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Hello world!
  * 
  */
 public class App extends JPanel implements TreeSelectionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private GeoGitUtil util;
 	private JTree tree;
 	private Repository repo;
 	private JEditorPane htmlPane;
 	private GeoGitDataStore store;
-	private File myFile;
 	private File base = new File("C:\\site_data_dir\\data\\admin");
-	private URL helpFile;
 	private String helpText;
 	private JScrollPane treeView;
 	private JScrollPane htmlView;
@@ -87,13 +76,11 @@ public class App extends JPanel implements TreeSelectionListener {
 			.getLogger("qpws.parkinfo.rest.geogit");
 
 	public static void main(String[] args) {
-		System.out.println("Hello World!");
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				createAndShowGUI();
 			}
 		});
-
 	}
 
 	private static void createAndShowGUI() {
@@ -119,10 +106,9 @@ public class App extends JPanel implements TreeSelectionListener {
 	}
 
 	public App() {
-
 		super(new GridLayout(1, 0));
 		URL helpFile = this.getClass().getResource("/help.html");
-		BufferedReader in =null;
+		BufferedReader in = null;
 		helpText = "";
 		String inputLine;
 		try {
@@ -132,31 +118,27 @@ public class App extends JPanel implements TreeSelectionListener {
 				helpText += inputLine;
 			}
 			in.close();
-
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} finally{
-			if (in!=null)
+		} finally {
+			if (in != null)
 				try {
 					in.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		}
-//		 JFileChooser chooser = new JFileChooser();
-//		 chooser.setDialogTitle("Select geogit repository folder");
-//		 chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//		 int returnVal = chooser.showOpenDialog(App.this);
-//		 if(returnVal == JFileChooser.APPROVE_OPTION) {
-//		 base = chooser.getSelectedFile();
-//		 } else {
-//		 System.out.println("Open command cancelled by user." );
-//		 return;
-//		 }
+		 JFileChooser chooser = new JFileChooser();
+		 chooser.setDialogTitle("Select geogit repository folder");
+		 chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		 int returnVal = chooser.showOpenDialog(App.this);
+		 if(returnVal == JFileChooser.APPROVE_OPTION) {
+		 base = chooser.getSelectedFile();
+		 } else {
+		 System.out.println("Open command cancelled by user." );
+		 return;
+		 }
 		util = new GeoGitUtil();
-
 		try {
 			repo = util.getRepository(base);
 			store = new GeoGitDataStore(repo);
@@ -176,35 +158,32 @@ public class App extends JPanel implements TreeSelectionListener {
 		createBranchViewNodes(top);
 		this.createRemotesViewNodes(top);
 		tree = new JTree(top);
-
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
 		treeView = new JScrollPane(tree);
+		treeView.setPreferredSize(new Dimension(450, 110));
 		htmlPane = new JEditorPane();
 		htmlPane.setEditable(false);
 		htmlPane.setContentType("text/html");
-		// initHelp();
 		htmlView = new JScrollPane(htmlPane);
-
+		this.htmlPane.setText(helpText);
 		// Add the scroll panes to a split pane.
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setTopComponent(treeView);
 		splitPane.setBottomComponent(htmlView);
-
-		Dimension minimumSize = new Dimension(300, 50);
+		Dimension minimumSize = new Dimension(300, 600);
 		htmlView.setMinimumSize(minimumSize);
 		treeView.setMinimumSize(minimumSize);
 		splitPane.setDividerLocation(300);
 		splitPane.setPreferredSize(new Dimension(800, 600));
-
 		// Add the split pane to this panel.
 		add(splitPane);
+		ScrollUtil.scroll(this.htmlView, ScrollUtil.TOP | ScrollUtil.LEFT);
 	}
 
 	public void windowClosed(WindowEvent e) {
 		if (repo != null)
 			repo.close();
-
 	}
 
 	private void createBranchViewNodes(DefaultMutableTreeNode top) {
@@ -212,27 +191,23 @@ public class App extends JPanel implements TreeSelectionListener {
 		featureTypes = new DefaultMutableTreeNode("Branches");
 		top.add(featureTypes);
 		Config config = new Config(this.store.getRepository());
-		Map<String, BranchConfigObject> branches = config.getBranches();
-		for (BranchConfigObject branch : config.getBranches().values()){
+		for (BranchConfigObject branch : config.getBranches().values()) {
 			DefaultMutableTreeNode configNode = new DefaultMutableTreeNode(
 					new RepoInfo(branch, RepoInfo.EntryType.CONFIG_BRANCH));
 			featureTypes.add(configNode);
 		}
-
 	}
-	
+
 	private void createRemotesViewNodes(DefaultMutableTreeNode top) {
 		DefaultMutableTreeNode featureTypes = null;
 		featureTypes = new DefaultMutableTreeNode("Remotes");
 		top.add(featureTypes);
 		Config config = new Config(this.store.getRepository());
-		Map<String, RemoteConfigObject> branches = config.getRemotes();
-		for (RemoteConfigObject branch : config.getRemotes().values()){
+		for (RemoteConfigObject branch : config.getRemotes().values()) {
 			DefaultMutableTreeNode configNode = new DefaultMutableTreeNode(
 					new RepoInfo(branch, RepoInfo.EntryType.CONFIG_REMOTE));
 			featureTypes.add(configNode);
 		}
-
 	}
 
 	private void createDataViewNodes(DefaultMutableTreeNode top) {
@@ -261,7 +236,6 @@ public class App extends JPanel implements TreeSelectionListener {
 			System.err.println("There was a problem opening repo!!!!!");
 			e.printStackTrace();
 		}
-
 	}
 
 	private void createHeadViewNodes(DefaultMutableTreeNode top) {
@@ -280,7 +254,6 @@ public class App extends JPanel implements TreeSelectionListener {
 			DefaultMutableTreeNode nsnode = new DefaultMutableTreeNode(
 					new RepoInfo(namespace, EntryType.REF_NAMESPACE));
 			headNode.add(nsnode);
-
 			Iterator<Ref> nsTree = store.getRepository().getObjectDatabase()
 					.getTree(namespace.getObjectId()).iterator(null);
 			while (nsTree.hasNext()) {
@@ -288,7 +261,6 @@ public class App extends JPanel implements TreeSelectionListener {
 				DefaultMutableTreeNode ftnode = new DefaultMutableTreeNode(
 						new RepoInfo(featType, EntryType.REF_FEATURE_TYPE));
 				nsnode.add(ftnode);
-
 				Iterator<Ref> ftTree = store.getRepository()
 						.getObjectDatabase().getTree(featType.getObjectId())
 						.iterator(null);
@@ -306,11 +278,7 @@ public class App extends JPanel implements TreeSelectionListener {
 		DefaultMutableTreeNode commitTree = new DefaultMutableTreeNode(
 				"Commits");
 		top.add(commitTree);
-
 		Ref head = store.getRepository().getHead();
-		// DefaultMutableTreeNode headNode = new DefaultMutableTreeNode(new
-		// RepoInfo(head, EntryType.REF_TREE));
-		// workingTree.add(headNode);
 		RevCommit headCommit = store.getRepository().getCommit(
 				head.getObjectId());
 		addCommitNav(commitTree, headCommit);
@@ -326,10 +294,6 @@ public class App extends JPanel implements TreeSelectionListener {
 			try {
 				RevCommit parentCommit = store.getRepository().getCommit(
 						commitId);
-				// DefaultMutableTreeNode parentCommitNode = new
-				// DefaultMutableTreeNode(new RepoInfo(parentCommit,
-				// EntryType.REV_COMMIT));
-				// parentTree.add(parentCommitNode);
 				addCommitNav(parentTree, parentCommit);
 			} catch (IllegalArgumentException ex) {
 				logger.log(Level.WARNING, "Could not find commit for objectid:"
@@ -432,12 +396,14 @@ public class App extends JPanel implements TreeSelectionListener {
 						.getEntry()));
 				break;
 			case CONFIG_REMOTE:
-				this.htmlPane.setText(this.displayRemoteConfigObject((RemoteConfigObject) info
-						.getEntry()));
+				this.htmlPane.setText(this
+						.displayRemoteConfigObject((RemoteConfigObject) info
+								.getEntry()));
 				break;
 			case CONFIG_BRANCH:
-				this.htmlPane.setText(this.displayBranchConfigObject((BranchConfigObject) info
-						.getEntry()));
+				this.htmlPane.setText(this
+						.displayBranchConfigObject((BranchConfigObject) info
+								.getEntry()));
 				break;
 			default:
 				this.htmlPane.setText(helpText);
@@ -448,7 +414,7 @@ public class App extends JPanel implements TreeSelectionListener {
 		if (DEBUG) {
 			System.out.println(nodeInfo.toString());
 		}
-		 ScrollUtil.scroll(htmlView, 8,1);
+		ScrollUtil.scroll(htmlView, 8, 1);
 	}
 
 	private String displayFeatureType(SimpleFeatureType type) {
@@ -457,7 +423,9 @@ public class App extends JPanel implements TreeSelectionListener {
 				+ type.getName().getLocalPart() + "</h1>\n";
 		output += "<ul>\n";
 		for (AttributeDescriptor attribute : type.getAttributeDescriptors()) {
-			output += "<li><b>Attribute:</b> " + attribute.getLocalName() + " <b>Type:</b> " + attribute.getType().getBinding().getName()+ " </li>  \n";
+			output += "<li><b>Attribute:</b> " + attribute.getLocalName()
+					+ " <b>Type:</b> "
+					+ attribute.getType().getBinding().getName() + " </li>  \n";
 		}
 		output += "</ul>\n";
 		return output;
@@ -468,28 +436,29 @@ public class App extends JPanel implements TreeSelectionListener {
 		output += "<h1>" + config.getName() + "</h1>\n";
 		output += "<ul>\n";
 		output += "<li><b>Name:</b>" + config.getName() + " </li>  \n";
-			output += "<li><b>Fetch:</b>" + config.getFetch() + " </li>  \n";
-			output += "<li><b>Url:</b>" + config.getUrl() + " </li>  \n";
+		output += "<li><b>Fetch:</b>" + config.getFetch() + " </li>  \n";
+		output += "<li><b>Url:</b>" + config.getUrl() + " </li>  \n";
 		output += "</ul>\n";
 		return output;
 	}
-	
+
 	private String displayBranchConfigObject(BranchConfigObject config) {
 		String output = "";
 		output += "<h1>" + config.getName() + "</h1>\n";
 		output += "<ul>\n";
 		output += "<li><b>Name:</b>" + config.getName() + " </li>  \n";
-			output += "<li><b>Merge:</b>" + config.getMerge() + " </li>  \n";
-			output += "<li><b>Remote:</b>" + config.getRemote() + " </li>  \n";
+		output += "<li><b>Merge:</b>" + config.getMerge() + " </li>  \n";
+		output += "<li><b>Remote:</b>" + config.getRemote() + " </li>  \n";
 		output += "</ul>\n";
 		return output;
 	}
+
 	private String displayRevCommit(RevCommit revCommit) {
 		String output = "";
 		output += "<h1>Commit." + revCommit.getId() + "</h1>\n";
 		output += "<ul><li><b>Id:</b> " + revCommit.getId() + "</li>\n";
-		output += "<li><b>Timestamp:</b> " + formatTimeStamp(revCommit.getTimestamp())
-				+ "</li>\n";
+		output += "<li><b>Timestamp:</b> "
+				+ formatTimeStamp(revCommit.getTimestamp()) + "</li>\n";
 		output += "<li><b>Author:</b> " + revCommit.getAuthor() + "</li>\n";
 		output += "<li><b>Message:</b> " + revCommit.getMessage()
 				+ "</li></ul>\n";
@@ -500,11 +469,11 @@ public class App extends JPanel implements TreeSelectionListener {
 		output += "</table>\n";
 		return output;
 	}
-	
-	private String formatTimeStamp(long timestamp)  {
+
+	private String formatTimeStamp(long timestamp) {
 		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-		 
-		Date resultdate = new Date( timestamp);
+
+		Date resultdate = new Date(timestamp);
 		return sdf.format(resultdate);
 	}
 
@@ -527,8 +496,8 @@ public class App extends JPanel implements TreeSelectionListener {
 		String output = "";
 		output += "<h1>" + feature.getID() + "</h1>\n";
 		for (Property prop : feature.getProperties()) {
-			output += "<li><b>Attribute:</b> " + prop.getName().getLocalPart() + " <b>Value:</b> "
-					+ prop.getValue() + "</li>  \n";
+			output += "<li><b>Attribute:</b> " + prop.getName().getLocalPart()
+					+ " <b>Value:</b> " + prop.getValue() + "</li>  \n";
 		}
 		return output;
 	}
