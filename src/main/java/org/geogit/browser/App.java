@@ -145,17 +145,16 @@ public class App extends JPanel implements TreeSelectionListener {
 					e.printStackTrace();
 				}
 		}
-System.out.println(helpText);
-		 JFileChooser chooser = new JFileChooser();
-		 chooser.setDialogTitle("Select geogit repository folder");
-		 chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		 int returnVal = chooser.showOpenDialog(App.this);
-		 if(returnVal == JFileChooser.APPROVE_OPTION) {
-		 base = chooser.getSelectedFile();
-		 } else {
-		 System.out.println("Open command cancelled by user." );
-		 return;
-		 }
+//		 JFileChooser chooser = new JFileChooser();
+//		 chooser.setDialogTitle("Select geogit repository folder");
+//		 chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		 int returnVal = chooser.showOpenDialog(App.this);
+//		 if(returnVal == JFileChooser.APPROVE_OPTION) {
+//		 base = chooser.getSelectedFile();
+//		 } else {
+//		 System.out.println("Open command cancelled by user." );
+//		 return;
+//		 }
 		util = new GeoGitUtil();
 
 		try {
@@ -337,13 +336,11 @@ System.out.println(helpText);
 						+ commitId);
 			}
 		}
-
 	}
 
 	public void valueChanged(TreeSelectionEvent arg0) {
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree
 				.getLastSelectedPathComponent();
-
 		if (node == null)
 			return;
 		SimpleFeatureType type = null;
@@ -354,7 +351,6 @@ System.out.println(helpText);
 			RepoInfo info = (RepoInfo) nodeInfo;
 			switch (info.getType()) {
 			case FEATURE_TYPE_NAME:
-
 				try {
 					type = getFeatureType((Name) info.getEntry());
 					this.htmlPane.setText(displayFeatureType(type));
@@ -445,12 +441,10 @@ System.out.println(helpText);
 				break;
 			default:
 				this.htmlPane.setText(helpText);
-
 			}
 		} else {
 			this.htmlPane.setText(helpText);
 		}
-		
 		if (DEBUG) {
 			System.out.println(nodeInfo.toString());
 		}
@@ -463,7 +457,7 @@ System.out.println(helpText);
 				+ type.getName().getLocalPart() + "</h1>\n";
 		output += "<ul>\n";
 		for (AttributeDescriptor attribute : type.getAttributeDescriptors()) {
-			output += "<li>" + attribute.toString() + " </li>  \n";
+			output += "<li><b>Attribute:</b> " + attribute.getLocalName() + " <b>Type:</b> " + attribute.getType().getBinding().getName()+ " </li>  \n";
 		}
 		output += "</ul>\n";
 		return output;
@@ -492,9 +486,6 @@ System.out.println(helpText);
 	}
 	private String displayRevCommit(RevCommit revCommit) {
 		String output = "";
-		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-		 
-		Date resultdate = new Date( revCommit.getTimestamp());
 		output += "<h1>Commit." + revCommit.getId() + "</h1>\n";
 		output += "<ul><li><b>Id:</b> " + revCommit.getId() + "</li>\n";
 		output += "<li><b>Timestamp:</b> " + formatTimeStamp(revCommit.getTimestamp())
@@ -522,7 +513,7 @@ System.out.println(helpText);
 		for (ObjectId commitId : revCommit.getParentIds()) {
 			try {
 				RevCommit commit = store.getRepository().getCommit(commitId);
-				output += "<tr><td>Commit." + revCommit.getId() + "</td><td>"
+				output += "<tr><td>Commit." + commit.getId() + "</td><td>"
 						+ formatTimeStamp(commit.getTimestamp()) + "</td><td>"
 						+ commit.getAuthor() + "</td><td>"
 						+ commit.getMessage() + "</td></tr>\n";
@@ -536,8 +527,8 @@ System.out.println(helpText);
 		String output = "";
 		output += "<h1>" + feature.getID() + "</h1>\n";
 		for (Property prop : feature.getProperties()) {
-			output += "<li>" + prop.getName().getLocalPart() + " : "
-					+ prop.getValue() + " </li>  \n";
+			output += "<li><b>Attribute:</b> " + prop.getName().getLocalPart() + " <b>Value:</b> "
+					+ prop.getValue() + "</li>  \n";
 		}
 		return output;
 	}

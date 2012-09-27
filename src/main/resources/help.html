@@ -1,8 +1,29 @@
 <html>
 <head>
-<title>help for browser
+<title>GeoGit Repository Browser
 </title>
 </head>
-<body>sample help
+<body><h1>GeoGit Repository Browser</h1>
+<p>This tool is intended as a tool for assisting a developer making ad hoc verifications of the content of a development repository. 
+This tool is useful for tracking down the current state of a repository and the data that it contains. It is not designed nor currently intended for large datasets.
+As all features are currently displayed in the tree, this could get infeasible quickly. A more robust solution would be to display in a pageable or 
+filterable table where the descriptions are currently shown.
+<h2>Data View</h2>
+
+<p>
+This subtree represents a data centric view of the current working directory and uses the GeoGit DataStore and FeatureCollections to query data. 
+</p>
+<h2>Working Tree</h2>
+<p>
+This subtree is built by using the underlying Repository class and more closely represents the actual physical structure of the Repository.
+</p>
+<h3>HEAD</h3>
+<p>This is the structure of the current checkout. HEAD > {NAMESPACE} > FEATURETYPE > FEATURE
+<h3>Commits</h3>
+<p>This is a linear list of all of the commits starting at the current head and finishing with the initial commit.
+<h3>Branches</h3>
+<p>These are the current branches defined in the Repository's config.
+<h3>Remotes</h3>
+<p>These are the current remotes defined in the Repository's config.
 </body>
 </html>
